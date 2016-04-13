@@ -35,6 +35,8 @@
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+
+#include <stdio.h>
 extern "C" {
     #include "fonts.h"
 }
@@ -47,6 +49,8 @@ int WINDOW_WIDTH = 800;
 int WINDOW_HEIGHT = 600;
 int mousex = 0;
 int mousey = 0;
+float rotx = 0;
+float roty = PI / 2.0;
 
 #define MAX_PARTICLES 50000
 #define GRAVITY 0.1
@@ -223,16 +227,15 @@ void check_mouse(XEvent *e, Game *game)
     */
     int movex = e->xbutton.x - (WINDOW_WIDTH / 2);
     int movey = e->xbutton.y - (WINDOW_HEIGHT / 2);
-    mousex += movex / 4;
-    mousey += movey / 4;
-    if (mousey < 0)
-        mousey = 0;
-    if (mousex < 0)
-        mousex = 0;
-    if (mousey > WINDOW_HEIGHT)
-        mousey = WINDOW_HEIGHT;
-    if (mousex > WINDOW_WIDTH)
-        mousex = WINDOW_WIDTH;
+    rotx +=(float) movex / 4000000.0 * WINDOW_HEIGHT; // <--Not a mistake. Use WH for scale!
+    roty +=(float) movey / 4000000.0 * WINDOW_HEIGHT;
+    rotx = fmod(rotx,2.0*PI);
+    if (rotx < 0.0)
+	rotx += PI * 2.0;
+    if (roty > PI)
+	roty = PI;
+    if (roty < 0)
+	roty = 0;
     if (movex != 0 || movey != 0)
         XWarpPointer(dpy,root,root,0,0,WINDOW_WIDTH,WINDOW_HEIGHT,WINDOW_WIDTH/2,WINDOW_HEIGHT/2);
     
@@ -261,8 +264,11 @@ void movement(Game *game)
 
 void render(Game *game)
 {
-    //int w = WINDOW_WIDTH;
-    int h = WINDOW_HEIGHT;
+    float w = WINDOW_WIDTH;
+    float h = WINDOW_HEIGHT;
+    float x = w / 2.0;
+    float y = h / 2.0;
+    float ra = h / 10.0;
     Rect r;
     
     glClear(GL_COLOR_BUFFER_BIT);
@@ -270,21 +276,24 @@ void render(Game *game)
     glColor3ub(200,200,200);
     
     glPushMatrix();
-    glTranslatef(mousex, WINDOW_HEIGHT - mousey, 0);
-    glBegin(GL_QUADS);
-    glVertex2i(h * -.1, h * -.1);
-    glVertex2i(h * -.1, h * .1);
-    glVertex2i(h * .1, h * .1);
-    glVertex2i(h * .1, h * -.1);
+    glTranslatef(x, y, 0);
+    glBegin(GL_POLYGON);
+    float c = cos(rotx);
+    float s = sin(rotx);
+    glVertex2f(ra * c, ra * s);
     glEnd();
     glPopMatrix();
+  
     
-    
-    r.bot = WINDOW_HEIGHT - 20;
-    r.left = 10;
+    r.bot = WINDOW_HEIGHT / 2;
+    r.left = WINDOW_WIDTH / 2;
     r.center = 0;
     //16 12 13 10 08 07 06 8b
-    ggprint8b(&r, 16, 0x00222222, "Test");
+    char buff [50];
+    sprintf(buff,"%f",rotx);
+    ggprint8b(&r, 16, 0x00222222, buff);
+    sprintf(buff,"%f",roty);
+    ggprint8b(&r, 16, 0x00222222, buff);
     
     
 }
