@@ -266,9 +266,7 @@ void render(Game *game)
 {
     float w = WINDOW_WIDTH;
     float h = WINDOW_HEIGHT;
-    float x = w / 2.0;
-    float y = h / 2.0;
-    float ra = h / 10.0;
+    float ra = h / 5.0;
     Rect r;
     
     glClear(GL_COLOR_BUFFER_BIT);
@@ -276,14 +274,24 @@ void render(Game *game)
     glColor3ub(200,200,200);
     
     glPushMatrix();
-    glTranslatef(x, y, 0);
+    glTranslatef(w / 3.0, h / 2.0, 0);
     glBegin(GL_POLYGON);
-    float c = cos(rotx);
-    float s = sin(rotx);
-    glVertex2f(ra * c, ra * s);
+    glVertex2f(ra * cos(-rotx), ra * sin(-rotx));
+    glVertex2f(ra * cos(-rotx+PI/2.0), ra * sin(-rotx+PI/2.0));
+    glVertex2f(ra * cos(-rotx+PI), ra * sin(-rotx+PI));
+    glVertex2f(ra * cos(-rotx+PI/2.0*3.0), ra * sin(-rotx+PI/2.0*3.0));
     glEnd();
     glPopMatrix();
   
+    glPushMatrix();
+    glTranslatef(w / 3.0 * 2.0, h / 2.0, 0);
+    glBegin(GL_POLYGON);
+    glVertex2f(ra * cos(roty), ra * sin(roty));
+    glVertex2f(ra * cos(roty+PI/2.0), ra * sin(roty+PI/2.0));
+    glVertex2f(ra * cos(roty+PI), ra * sin(roty+PI));
+    glVertex2f(ra * cos(roty+PI/2.0*3.0), ra * sin(roty+PI/2.0*3.0));
+    glEnd();
+    glPopMatrix();
     
     r.bot = WINDOW_HEIGHT / 2;
     r.left = WINDOW_WIDTH / 2;
@@ -291,9 +299,9 @@ void render(Game *game)
     //16 12 13 10 08 07 06 8b
     char buff [50];
     sprintf(buff,"%f",rotx);
-    ggprint8b(&r, 16, 0x00222222, buff);
+    ggprint16(&r, 16, 0x00222222, buff);
     sprintf(buff,"%f",roty);
-    ggprint8b(&r, 16, 0x00222222, buff);
+    ggprint16(&r, 16, 0x00222222, buff);
     
     
 }
