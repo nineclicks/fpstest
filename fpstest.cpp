@@ -85,6 +85,7 @@ void check_mouse(XEvent *e, Game *game);
 int check_keys(XEvent *e, Game *game);
 void movement(Game *game);
 void render(Game *game);
+void ShowCursor(const int onoff);
 
 Vec normal(Vec A, Vec B, Vec C);
 Vec cross(Vec A, Vec B);
@@ -203,6 +204,32 @@ void init_opengl(void)
     initialize_fonts();
 }
 */
+void ShowCursor(const int onoff)
+{
+    // See: asteroids.cpp
+    if (onoff) {
+        //this removes our own blank cursor.
+        XUndefineCursor(dpy, win);
+        return;
+    }
+    //vars to make blank cursor
+    Pixmap blank;
+    XColor dummy;
+    char data[1] = {0};
+    Cursor cursor;
+    //make a blank cursor
+    blank = XCreateBitmapFromData (dpy, win, data, 1, 1);
+    if (blank == None)
+		std::cout << "error: out of memory." << std::endl;
+    cursor = XCreatePixmapCursor(dpy, blank, blank, &dummy, &dummy, 0, 0);
+    XFreePixmap(dpy, blank);
+    //this makes you the cursor. then set it using this function
+    XDefineCursor(dpy, win, cursor);
+    //after you do not need the cursor anymore use this function.
+    //it will undo the last change done by XDefineCursor
+    //(thus do only use ONCE XDefineCursor and then XUndefineCursor):
+}
+
 void init_opengl(void)
 {
     float w = WINDOW_WIDTH;
@@ -226,10 +253,19 @@ void init_opengl(void)
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
    glEnable(GL_DEPTH_TEST);
+   ShowCursor(0);
 
+    
+   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+   GLfloat mat_shininess[] = { 50.0 };
+   GLfloat light_position[] = { 0.0, 0.0, 0.0, 0.0 };
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glShadeModel (GL_SMOOTH);
+
+   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
-
-
 void check_mouse(XEvent *e, Game *game)
 {
     
@@ -314,7 +350,7 @@ Vec cross(Vec A, Vec B)
 
 Vec normalize(Vec A)
 {
-    float mag = sqrt(pow(A.x,2)+pow(A.y,2)+pow(A.z,2));
+    float mag = -1.0 * sqrt(pow(A.x,2)+pow(A.y,2)+pow(A.z,2));
     A.x /= mag;
     A.y /= mag;
     A.z /= mag;
@@ -332,16 +368,6 @@ void render(Game *game)
     float top = 2.0 * (cos(val) + 1.0) + 1.0;
     float bot = -1.0;
     
-    
-   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-   GLfloat mat_shininess[] = { 50.0 };
-   GLfloat light_position[] = { 1.0, top - 0.2, 1.0, 0.0 };
-   glClearColor (0.0, 0.0, 0.0, 0.0);
-   glShadeModel (GL_SMOOTH);
-
-   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
-   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     
     Vec a,b,c,d;
 
