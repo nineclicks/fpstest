@@ -86,6 +86,10 @@ int check_keys(XEvent *e, Game *game);
 void movement(Game *game);
 void render(Game *game);
 
+Vec normal(Vec A, Vec B, Vec C);
+Vec cross(Vec A, Vec B);
+Vec normalize(Vec A);
+
 
 int main(void)
 {
@@ -182,7 +186,7 @@ void initXWindows(void)
    
     
 }
-
+/*
 void init_opengl(void)
 {
     //OpenGL initialization
@@ -195,9 +199,34 @@ void init_opengl(void)
     //Set the screen background color
     glClearColor(1.0, 1.0, 1.0, 1.0);
     ///////////////////////////////////
-    
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
+}
+*/
+void init_opengl(void)
+{
+    float w = WINDOW_WIDTH;
+    float h = WINDOW_HEIGHT;
+    //OpenGL initialization
+    //glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+    //Initialize matrices
+    glMatrixMode(GL_PROJECTION); glLoadIdentity();
+    glMatrixMode(GL_MODELVIEW); glLoadIdentity();
+    
+    glFrustum(-1.0/h*w, 1.0/h*w, -1, 1, 1.5, 200.0);
+    //Set the screen background color
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    ///////////////////////////////////
+    glEnable(GL_TEXTURE_2D);
+    initialize_fonts();
+
+
+   glEnable(GL_COLOR_MATERIAL);
+   
+   glEnable(GL_LIGHTING);
+   glEnable(GL_LIGHT0);
+   glEnable(GL_DEPTH_TEST);
+
 }
 
 
@@ -261,38 +290,224 @@ void movement(Game *game)
     
 }
 
+Vec normal(Vec A, Vec B, Vec C)
+{
+    Vec X;
+    Vec Y;
+    X.x = A.x - B.x;
+    X.y = A.y - B.y;
+    X.z = A.z - B.z;
+    Y.x = A.x - C.x;
+    Y.y = A.y - C.y;
+    Y.z = A.z - C.z;
+    return normalize(cross(X,Y));
+}
+
+Vec cross(Vec A, Vec B)
+{
+    Vec X;
+    X.x = A.y*B.z-A.z*B.y;
+    X.y = A.z*B.x-A.x*B.z;
+    X.z = A.x*B.y-A.y*B.x;
+    return X;
+}
+
+Vec normalize(Vec A)
+{
+    float mag = sqrt(pow(A.x,2)+pow(A.y,2)+pow(A.z,2));
+    A.x /= mag;
+    A.y /= mag;
+    A.z /= mag;
+    return A;
+}
+
 
 void render(Game *game)
 {
-    float w = WINDOW_WIDTH;
-    float h = WINDOW_HEIGHT;
-    float ra = h / 5.0;
-    Rect r;
+    static float val = 0.0;
+    val += 0.01;
+    float ra = 10.0;
+    //Rect r;
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float top = 2.0 * (cos(val) + 1.0) + 1.0;
+    float bot = -1.0;
     
-    glClear(GL_COLOR_BUFFER_BIT);
     
+   GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+   GLfloat mat_shininess[] = { 50.0 };
+   GLfloat light_position[] = { 1.0, top - 0.2, 1.0, 0.0 };
+   glClearColor (0.0, 0.0, 0.0, 0.0);
+   glShadeModel (GL_SMOOTH);
+
+   glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
+   glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
+   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    
+    Vec a,b,c,d;
+
     glColor3ub(200,200,200);
-    
     glPushMatrix();
-    glTranslatef(w / 3.0, h / 2.0, 0);
     glBegin(GL_POLYGON);
-    glVertex2f(ra * cos(-rotx), ra * sin(-rotx));
-    glVertex2f(ra * cos(-rotx+PI/2.0), ra * sin(-rotx+PI/2.0));
-    glVertex2f(ra * cos(-rotx+PI), ra * sin(-rotx+PI));
-    glVertex2f(ra * cos(-rotx+PI/2.0*3.0), ra * sin(-rotx+PI/2.0*3.0));
+    a.x = ra * cos(-rotx);
+    a.y = bot;
+    a.z = ra * sin(-rotx);
+    b.x = ra * cos(-rotx+PI/2.0);
+    b.y = bot;
+    b.z = ra * sin(-rotx+PI/2.0);
+    c.x = ra * cos(-rotx+PI);
+    c.y = bot;
+    c.z = ra * sin(-rotx+PI);
+    d.x = ra * cos(-rotx+PI/2.0*3.0);
+    d.y = bot;
+    d.z = ra * sin(-rotx+PI/2.0*3.0);
+    Vec N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
     glEnd();
     glPopMatrix();
-  
+    
+    
+    glColor3ub(200,200,255);
     glPushMatrix();
-    glTranslatef(w / 3.0 * 2.0, h / 2.0, 0);
     glBegin(GL_POLYGON);
-    glVertex2f(ra * cos(roty), ra * sin(roty));
-    glVertex2f(ra * cos(roty+PI/2.0), ra * sin(roty+PI/2.0));
-    glVertex2f(ra * cos(roty+PI), ra * sin(roty+PI));
-    glVertex2f(ra * cos(roty+PI/2.0*3.0), ra * sin(roty+PI/2.0*3.0));
+    a.x = ra * cos(-rotx);
+    a.y = top;
+    a.z = ra * sin(-rotx);
+    b.x = ra * cos(-rotx+PI/2.0);
+    b.y = top;
+    b.z = ra * sin(-rotx+PI/2.0);
+    c.x = ra * cos(-rotx+PI);
+    c.y = top;
+    c.z = ra * sin(-rotx+PI);
+    d.x = ra * cos(-rotx+PI/2.0*3.0);
+    d.y = top;
+    d.z = ra * sin(-rotx+PI/2.0*3.0);
+    N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
     glEnd();
     glPopMatrix();
     
+    
+    glColor3ub(255,200,200);
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+    a.x = ra * cos(-rotx);
+    a.y = bot;
+    a.z = ra * sin(-rotx);
+    b.x = ra * cos(-rotx+PI/2.0);
+    b.y = bot;
+    b.z = ra * sin(-rotx+PI/2.0);
+    c.x = ra * cos(-rotx+PI/2.0);
+    c.y = top;
+    c.z = ra * sin(-rotx+PI/2.0);
+    d.x = ra * cos(-rotx);
+    d.y = top;
+    d.z = ra * sin(-rotx);
+    N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
+    glEnd();
+    glPopMatrix();
+    
+    
+
+    glColor3ub(255,255,255);
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+    a.x = ra * cos(-rotx+PI/2.0);
+    a.y = bot;
+    a.z = ra * sin(-rotx+PI/2.0);
+    b.x = ra * cos(-rotx+PI);
+    b.y = bot;
+    b.z = ra * sin(-rotx+PI);
+    c.x = ra * cos(-rotx+PI);
+    c.y = top;
+    c.z = ra * sin(-rotx+PI);
+    d.x = ra * cos(-rotx+PI/2.0);
+    d.y = top;
+    d.z = ra * sin(-rotx+PI/2.0);
+    N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
+    glEnd();
+    glPopMatrix();
+    
+    
+    glColor3ub(200,255,255);
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+    a.x = ra * cos(-rotx+PI);
+    a.y = bot;
+    a.z = ra * sin(-rotx+PI);
+    b.x = ra * cos(-rotx+PI/2.0*3.0);
+    b.y = bot;
+    b.z = ra * sin(-rotx+PI/2.0*3.0);
+    c.x = ra * cos(-rotx+PI/2.0*3.0);
+    c.y = top;
+    c.z = ra * sin(-rotx+PI/2.0*3.0);
+    d.x = ra * cos(-rotx+PI);
+    d.y = top;
+    d.z = ra * sin(-rotx+PI);
+    N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
+    glEnd();
+    glPopMatrix();
+    
+    
+    glColor3ub(255,200,255);
+    glPushMatrix();
+    glBegin(GL_POLYGON);
+    a.x = ra * cos(-rotx);
+    a.y = bot;
+    a.z = ra * sin(-rotx);
+    b.x = ra * cos(-rotx+PI/2.0*3.0);
+    b.y = bot;
+    b.z = ra * sin(-rotx+PI/2.0*3.0);
+    c.x = ra * cos(-rotx+PI/2.0*3.0);
+    c.y = top;
+    c.z = ra * sin(-rotx+PI/2.0*3.0);
+    d.x = ra * cos(-rotx);
+    d.y = top;
+    d.z = ra * sin(-rotx);
+    N = normal(a,b,c);
+    glNormal3f(N.x,N.y,N.z);
+    glVertex3f(a.x, a.y, a.z);
+    glVertex3f(b.x, b.y, b.z);
+    glVertex3f(c.x, c.y, c.z);
+    glVertex3f(d.x, d.y, d.z);
+    glEnd();
+    glPopMatrix();
+    
+  /*
+    glPushMatrix();
+    glTranslatef(5.0, 0.0, 0.0);
+    glBegin(GL_POLYGON);
+    glVertex3f(ra * cos(roty), ra * sin(roty), z);
+    glVertex3f(ra * cos(roty+PI/2.0), ra * sin(roty+PI/2.0), z);
+    glVertex3f(ra * cos(roty+PI), ra * sin(roty+PI), z);
+    glVertex3f(ra * cos(roty+PI/2.0*3.0), ra * sin(roty+PI/2.0*3.0), z);
+    glEnd();
+    glPopMatrix();
+    */
+    /*
+    glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
     r.bot = WINDOW_HEIGHT / 2;
     r.left = WINDOW_WIDTH / 2;
     r.center = 0;
@@ -302,7 +517,9 @@ void render(Game *game)
     ggprint16(&r, 16, 0x00222222, buff);
     sprintf(buff,"%f",roty);
     ggprint16(&r, 16, 0x00222222, buff);
+    */
     
+    glFlush ();
     
 }
 
