@@ -163,8 +163,8 @@ void initXWindows(void)
     XGrabKeyboard(dpy, root,
                   False, GrabModeAsync, GrabModeAsync, CurrentTime);
     
-    WINDOW_WIDTH = getWinAttr.width / 4;
-    WINDOW_HEIGHT = getWinAttr.height / 4;
+    WINDOW_WIDTH = getWinAttr.width;
+    WINDOW_HEIGHT = getWinAttr.height;
     
     XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
     if(vi == NULL) {
@@ -371,163 +371,44 @@ void render(Game *game)
 {
     static float val = 0.0;
     val += 0.01;
-    float ra = 10.0;
+    float ra = 5.0;
     //Rect r;
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float top = 2.0 * (cos(val) + 1.0) + 1.0;
-    float bot = -1.0;
+    float bot = -2.0;
     
+    Vec v[6];
+    v[0].x = v[3].x = v[7].x = v[4].x = ra;
+    v[1].x = v[2].x = v[5].x = v[6].x = -ra;
     
-    Vec a,b,c,d;
-
-    glColor3ub(100,100,100);
+    v[0].y = v[1].y = v[2].y = v[3].y = bot;
+    v[4].y = v[5].y = v[6].y = v[7].y = top;
+    
+    v[0].z = v[1].z = v[5].z = v[4].z = -ra;
+    v[2].z = v[3].z = v[6].z = v[7].z = ra;
+    /*int ctop[] = {4,5,6,7};
+    int cbot[] = {0,1,2,3};
+    int cfront[] = {0,1,5,4};
+    int cback[] = {3,2,6,7};
+    int cleft[] = {1,2,6,5};
+    int cright[] = {0,3,7,4};
+    int *verts[] = {ctop,cbot,cfront,cback,cleft,cright};*/
+    int verts[][4] = {{4,5,6,7},{0,1,2,3},{0,1,5,4},{3,2,6,7},{1,2,6,5},{0,3,7,4}};
     glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx);
-    a.y = bot;
-    a.z = ra * sin(-rotx) + game->pos.z;
-    b.x = ra * cos(-rotx+PI/2.0);
-    b.y = bot;
-    b.z = ra * sin(-rotx+PI/2.0) + game->pos.z;
-    c.x = ra * cos(-rotx+PI);
-    c.y = bot;
-    c.z = ra * sin(-rotx+PI) + game->pos.z;
-    d.x = ra * cos(-rotx+PI/2.0*3.0);
-    d.y = bot;
-    d.z = ra * sin(-rotx+PI/2.0*3.0) + game->pos.z;
-    Vec N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
-    glPopMatrix();
-    
-    
-    glColor3ub(150,150,255);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx);
-    a.y = top;
-    a.z = ra * sin(-rotx);
-    b.x = ra * cos(-rotx+PI/2.0);
-    b.y = top;
-    b.z = ra * sin(-rotx+PI/2.0);
-    c.x = ra * cos(-rotx+PI);
-    c.y = top;
-    c.z = ra * sin(-rotx+PI);
-    d.x = ra * cos(-rotx+PI/2.0*3.0);
-    d.y = top;
-    d.z = ra * sin(-rotx+PI/2.0*3.0);
-    N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
-    glPopMatrix();
-    
-    
-    glColor3ub(255,150,150);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx);
-    a.y = bot;
-    a.z = ra * sin(-rotx);
-    b.x = ra * cos(-rotx+PI/2.0);
-    b.y = bot;
-    b.z = ra * sin(-rotx+PI/2.0);
-    c.x = ra * cos(-rotx+PI/2.0);
-    c.y = top;
-    c.z = ra * sin(-rotx+PI/2.0);
-    d.x = ra * cos(-rotx);
-    d.y = top;
-    d.z = ra * sin(-rotx);
-    N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
-    glPopMatrix();
-    
-    
-
-    glColor3ub(255,255,255);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx+PI/2.0);
-    a.y = bot;
-    a.z = ra * sin(-rotx+PI/2.0);
-    b.x = ra * cos(-rotx+PI);
-    b.y = bot;
-    b.z = ra * sin(-rotx+PI);
-    c.x = ra * cos(-rotx+PI);
-    c.y = top;
-    c.z = ra * sin(-rotx+PI);
-    d.x = ra * cos(-rotx+PI/2.0);
-    d.y = top;
-    d.z = ra * sin(-rotx+PI/2.0);
-    N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
-    glPopMatrix();
-    
-    
-    glColor3ub(150,255,255);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx+PI);
-    a.y = bot;
-    a.z = ra * sin(-rotx+PI);
-    b.x = ra * cos(-rotx+PI/2.0*3.0);
-    b.y = bot;
-    b.z = ra * sin(-rotx+PI/2.0*3.0);
-    c.x = ra * cos(-rotx+PI/2.0*3.0);
-    c.y = top;
-    c.z = ra * sin(-rotx+PI/2.0*3.0);
-    d.x = ra * cos(-rotx+PI);
-    d.y = top;
-    d.z = ra * sin(-rotx+PI);
-    N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
-    glPopMatrix();
-    
-    
-    glColor3ub(255,150,255);
-    glPushMatrix();
-    glBegin(GL_POLYGON);
-    a.x = ra * cos(-rotx);
-    a.y = bot;
-    a.z = ra * sin(-rotx);
-    b.x = ra * cos(-rotx+PI/2.0*3.0);
-    b.y = bot;
-    b.z = ra * sin(-rotx+PI/2.0*3.0);
-    c.x = ra * cos(-rotx+PI/2.0*3.0);
-    c.y = top;
-    c.z = ra * sin(-rotx+PI/2.0*3.0);
-    d.x = ra * cos(-rotx);
-    d.y = top;
-    d.z = ra * sin(-rotx);
-    N = normal(a,b,c);
-    glNormal3f(N.x,N.y,N.z);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(b.x, b.y, b.z);
-    glVertex3f(c.x, c.y, c.z);
-    glVertex3f(d.x, d.y, d.z);
-    glEnd();
+        glRotatef(roty / PI * 180.0 - 90.0,1,0,0);
+        glRotatef(rotx / PI * 180.0,0,1,0);
+    for (int i = 0; i < 6; i++) {
+        glColor3ub(255 / 6 * i,0,255 - 255 / 6 * i);
+        
+        glBegin(GL_POLYGON);
+        //Vec N = normal(a,b,c);
+        //glNormal3f(N.x,N.y,N.z);
+        for (int j = 0; j < 4; j++){
+            glVertex3f(v[verts[i][j]].x, v[verts[i][j]].y, v[verts[i][j]].z);
+        }
+        glEnd();
+        
+    }
     glPopMatrix();
     
   /*
