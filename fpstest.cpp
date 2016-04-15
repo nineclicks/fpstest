@@ -57,7 +57,7 @@ float roty = PI / 2.0;
 #define BOUNCE 0.1
 #define MAX_BOXES 5
 #define MAX_CIRC 2
-
+using namespace std;
 
 //X Windows variables
 Display *dpy;
@@ -74,7 +74,7 @@ struct Vec {
 
 
 struct Game {
-    
+    Vec pos;    
 };
 
 //Function prototypes
@@ -100,6 +100,10 @@ int main(void)
     init_opengl();
     //declare game object
     Game game;
+
+    game.pos.x = 0.0;
+    game.pos.y = 0.0;
+    game.pos.z = 0.0;
     
     //start animation
     while(!done) {
@@ -159,8 +163,8 @@ void initXWindows(void)
     XGrabKeyboard(dpy, root,
                   False, GrabModeAsync, GrabModeAsync, CurrentTime);
     
-    WINDOW_WIDTH = getWinAttr.width;
-    WINDOW_HEIGHT = getWinAttr.height;
+    WINDOW_WIDTH = getWinAttr.width / 4;
+    WINDOW_HEIGHT = getWinAttr.height / 4;
     
     XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
     if(vi == NULL) {
@@ -175,8 +179,6 @@ void initXWindows(void)
     PointerMotionMask |
     StructureNotifyMask | SubstructureNotifyMask;
     swa.override_redirect = True;
-    //win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-    //                    InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
     
     win = XCreateWindow(dpy, root, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
                         InputOutput, vi->visual, CWBorderPixel|CWColormap|CWEventMask|CWOverrideRedirect, &swa);
@@ -248,10 +250,10 @@ void init_opengl(void)
     initialize_fonts();
 
 
-   glEnable(GL_COLOR_MATERIAL);
+   //glEnable(GL_COLOR_MATERIAL);
    
-   glEnable(GL_LIGHTING);
-   glEnable(GL_LIGHT0);
+   //glEnable(GL_LIGHTING);
+   //glEnable(GL_LIGHT0);
    glEnable(GL_DEPTH_TEST);
    ShowCursor(0);
 
@@ -292,8 +294,8 @@ void check_mouse(XEvent *e, Game *game)
     */
     int movex = e->xbutton.x - (WINDOW_WIDTH / 2);
     int movey = e->xbutton.y - (WINDOW_HEIGHT / 2);
-    rotx +=(float) movex / 4000000.0 * WINDOW_HEIGHT; // <--Not a mistake. Use WH for scale!
-    roty +=(float) movey / 4000000.0 * WINDOW_HEIGHT;
+    rotx +=(float) movex / 2000.0;
+    roty +=(float) movey / 2000.0;
     rotx = fmod(rotx,2.0*PI);
     if (rotx < 0.0)
 	rotx += PI * 2.0;
@@ -315,6 +317,13 @@ int check_keys(XEvent *e, Game *game)
         if (key == XK_Escape) {
             return 1;
         }
+	if (key == XK_w) {
+	    float dirz = cos(rotx);
+	    float dirx = sin(rotx);
+	    game->pos.z += dirz;
+	    game->pos.x += dirx;
+	    cout << game->pos.x << " " << game->pos.y << " " << game->pos.z << "\n";
+	}
         //You may check other keys here.
         
     }
@@ -371,21 +380,21 @@ void render(Game *game)
     
     Vec a,b,c,d;
 
-    glColor3ub(200,200,200);
+    glColor3ub(100,100,100);
     glPushMatrix();
     glBegin(GL_POLYGON);
     a.x = ra * cos(-rotx);
     a.y = bot;
-    a.z = ra * sin(-rotx);
+    a.z = ra * sin(-rotx) + game->pos.z;
     b.x = ra * cos(-rotx+PI/2.0);
     b.y = bot;
-    b.z = ra * sin(-rotx+PI/2.0);
+    b.z = ra * sin(-rotx+PI/2.0) + game->pos.z;
     c.x = ra * cos(-rotx+PI);
     c.y = bot;
-    c.z = ra * sin(-rotx+PI);
+    c.z = ra * sin(-rotx+PI) + game->pos.z;
     d.x = ra * cos(-rotx+PI/2.0*3.0);
     d.y = bot;
-    d.z = ra * sin(-rotx+PI/2.0*3.0);
+    d.z = ra * sin(-rotx+PI/2.0*3.0) + game->pos.z;
     Vec N = normal(a,b,c);
     glNormal3f(N.x,N.y,N.z);
     glVertex3f(a.x, a.y, a.z);
@@ -396,7 +405,7 @@ void render(Game *game)
     glPopMatrix();
     
     
-    glColor3ub(200,200,255);
+    glColor3ub(150,150,255);
     glPushMatrix();
     glBegin(GL_POLYGON);
     a.x = ra * cos(-rotx);
@@ -421,7 +430,7 @@ void render(Game *game)
     glPopMatrix();
     
     
-    glColor3ub(255,200,200);
+    glColor3ub(255,150,150);
     glPushMatrix();
     glBegin(GL_POLYGON);
     a.x = ra * cos(-rotx);
@@ -472,7 +481,7 @@ void render(Game *game)
     glPopMatrix();
     
     
-    glColor3ub(200,255,255);
+    glColor3ub(150,255,255);
     glPushMatrix();
     glBegin(GL_POLYGON);
     a.x = ra * cos(-rotx+PI);
@@ -497,7 +506,7 @@ void render(Game *game)
     glPopMatrix();
     
     
-    glColor3ub(255,200,255);
+    glColor3ub(255,150,255);
     glPushMatrix();
     glBegin(GL_POLYGON);
     a.x = ra * cos(-rotx);
