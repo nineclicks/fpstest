@@ -264,7 +264,7 @@ void init_opengl(void)
    glEnable(GL_LIGHT0);
    glEnable(GL_DEPTH_TEST);
    ShowCursor(0);
-
+/*
     
    GLfloat mat_specular[] = { 0.1, 0.1, 0.1, 1.0 };
    GLfloat mat_shininess[] = { 0.0 };
@@ -275,6 +275,27 @@ void init_opengl(void)
    glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
    glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+   */
+	glClearDepth( 1.0f );
+	glEnable( GL_DEPTH_TEST );
+	glDepthFunc( GL_LEQUAL );
+	//glDepthFunc(GL_LESS);
+	glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+	GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
+	GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
+	GLfloat specular[] = { 0.7, 0.7, 0.7, 1 };
+	glLightModelfv( GL_LIGHT_MODEL_AMBIENT, amb_light );
+	glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+	glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+	glEnable( GL_LIGHT0 );
+	glEnable( GL_COLOR_MATERIAL );
+	glShadeModel( GL_SMOOTH );
+	glLightModeli( GL_LIGHT_MODEL_TWO_SIDE, GL_FALSE );
+	glDepthFunc( GL_LEQUAL );
+	glEnable( GL_DEPTH_TEST );
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0); 
+   
 }
 void check_mouse(XEvent *e, Game *game)
 {
@@ -422,7 +443,7 @@ void HUD(Game *game)
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0.0, WINDOW_WIDTH, WINDOW_HEIGHT, 0.0, -1.0, 10.0);
+    glOrtho(0.0, WINDOW_WIDTH, 0.0, WINDOW_HEIGHT, -1.0, 10.0);
     glMatrixMode(GL_MODELVIEW);
     //glPushMatrix();        ----Not sure if I need this
     glLoadIdentity();
@@ -450,6 +471,16 @@ void HUD(Game *game)
     glVertex2d(w / 2+1, h / 2 - l / 20);
     glVertex2d(w / 2+1, h / 2 + l / 20);
     glEnd();
+    Rect r;
+    r.bot = WINDOW_HEIGHT / 2+100;
+    r.left = WINDOW_WIDTH / 2+100;
+    r.center = 0;
+    //16 12 13 10 08 07 06 8b
+    char buff [50];
+    sprintf(buff,"%f",rotx);
+    ggprint16(&r, 16, 0x00222222, buff);
+    sprintf(buff,"%f",roty);
+    ggprint16(&r, 16, 0x00222222, buff);
     
     // Making sure we can render 3d again
     glMatrixMode(GL_PROJECTION);
@@ -469,7 +500,7 @@ void render(Game *game)
     float ra = 20.0;
     //Rect r;
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    float top = 4.0;
+    float top = 50.0;
     float bot = -2.0;
     
     Vec v[6];
@@ -528,30 +559,6 @@ void render(Game *game)
     
     
     glPopMatrix();
-    
-  /*
-    glPushMatrix();
-    glTranslatef(5.0, 0.0, 0.0);
-    glBegin(GL_POLYGON);
-    glVertex3f(ra * cos(roty), ra * sin(roty), z);
-    glVertex3f(ra * cos(roty+PI/2.0), ra * sin(roty+PI/2.0), z);
-    glVertex3f(ra * cos(roty+PI), ra * sin(roty+PI), z);
-    glVertex3f(ra * cos(roty+PI/2.0*3.0), ra * sin(roty+PI/2.0*3.0), z);
-    glEnd();
-    glPopMatrix();
-    */
-    /*
-    glOrtho(0, WINDOW_WIDTH, 0, WINDOW_HEIGHT, -1, 1);
-    r.bot = WINDOW_HEIGHT / 2;
-    r.left = WINDOW_WIDTH / 2;
-    r.center = 0;
-    //16 12 13 10 08 07 06 8b
-    char buff [50];
-    sprintf(buff,"%f",rotx);
-    ggprint16(&r, 16, 0x00222222, buff);
-    sprintf(buff,"%f",roty);
-    ggprint16(&r, 16, 0x00222222, buff);
-    */
     HUD(game);
     glFlush ();
     
