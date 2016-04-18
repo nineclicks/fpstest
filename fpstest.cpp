@@ -500,7 +500,7 @@ void render(Game *game)
     float ra = 20.0;
     //Rect r;
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    float top = 50.0;
+    float top = 4.0;
     float bot = -2.0;
     
     Vec v[6];
