@@ -1,6 +1,7 @@
 // Edited by: Nicholas Gardner
 // Program: FPS framework
 // Purpose: This program demonstrates the use of OpenGL and XWindows
+//               80 chars-->                                                 -->
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
@@ -14,7 +15,6 @@
 extern "C" {
 #include "fonts.h"
 }
-//               80 chars-->                                                 --><--
 //instance rendering, flyweight
 //linear interpolation tween
 
@@ -94,26 +94,27 @@ int main(void)
     roty = 0.0;
     //start animation
     while(!done) {
-	while(XPending(dpy)) {
-	    XEvent e;
-	    XNextEvent(dpy, &e);
-	    check_mouse(&e, &game);
-	    done = check_keys(&e, &game);
+        while(XPending(dpy)) {
+            XEvent e;
+            XNextEvent(dpy, &e);
+            check_mouse(&e, &game);
+            done = check_keys(&e, &game);
 
-	    // Deal with window resize.
-	    if (e.type == ConfigureNotify) {
-		XConfigureEvent xce = e.xconfigure;
-		if (xce.width != WINDOW_WIDTH || xce.height != WINDOW_HEIGHT) {
-		    WINDOW_WIDTH = xce.width;
-		    WINDOW_HEIGHT = xce.height;
-		    init_opengl();
-		}
-	    }
+            // Deal with window resize.
+            if (e.type == ConfigureNotify) {
+                XConfigureEvent xce = e.xconfigure;
+                if (xce.width != WINDOW_WIDTH 
+                        || xce.height != WINDOW_HEIGHT) {
+                    WINDOW_WIDTH = xce.width;
+                    WINDOW_HEIGHT = xce.height;
+                    init_opengl();
+                }
+            }
 
-	}
-	movement(&game);
-	render(&game);
-	glXSwapBuffers(dpy, win);
+        }
+        movement(&game);
+        render(&game);
+        glXSwapBuffers(dpy, win);
     }
     cleanupXWindows();
     return 0;
@@ -139,8 +140,8 @@ void initXWindows(void)
     GLint att[] = { GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None };
     dpy = XOpenDisplay(NULL);
     if (dpy == NULL) {
-	std::cout << "\n\tcannot connect to X server\n" << std::endl;
-	exit(EXIT_FAILURE);
+        std::cout << "\n\tcannot connect to X server\n" << std::endl;
+        exit(EXIT_FAILURE);
     }
     root = DefaultRootWindow(dpy);
 
@@ -148,27 +149,29 @@ void initXWindows(void)
     XGetWindowAttributes(dpy, root, &getWinAttr);
 
     XGrabKeyboard(dpy, root,
-	    False, GrabModeAsync, GrabModeAsync, CurrentTime);
+            False, GrabModeAsync, GrabModeAsync, CurrentTime);
 
     WINDOW_WIDTH = getWinAttr.width;
     WINDOW_HEIGHT = getWinAttr.height;
 
     XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
     if(vi == NULL) {
-	std::cout << "\n\tno appropriate visual found\n" << std::endl;
-	exit(EXIT_FAILURE);
+        std::cout << "\n\tno appropriate visual found\n" << std::endl;
+        exit(EXIT_FAILURE);
     } 
     Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
     XSetWindowAttributes swa;
     swa.colormap = cmap;
     swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-	ButtonPress | ButtonReleaseMask |
-	PointerMotionMask |
-	StructureNotifyMask | SubstructureNotifyMask;
+        ButtonPress | ButtonReleaseMask |
+        PointerMotionMask |
+        StructureNotifyMask | SubstructureNotifyMask;
     swa.override_redirect = True;
 
-    win = XCreateWindow(dpy, root, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
-	    InputOutput, vi->visual, CWBorderPixel|CWColormap|CWEventMask|CWOverrideRedirect, &swa);
+    win = XCreateWindow(dpy, root, 0, 0, 
+            WINDOW_WIDTH, WINDOW_HEIGHT, 0, vi->depth,
+            InputOutput, vi->visual, CWBorderPixel|CWColormap|CWEventMask|
+            CWOverrideRedirect, &swa);
 
     set_title();
     glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
@@ -181,9 +184,9 @@ void ShowCursor(const int onoff)
 {
     // Source: Gordon's asteroids.cpp
     if (onoff) {
-	//this removes our own blank cursor.
-	XUndefineCursor(dpy, win);
-	return;
+        //this removes our own blank cursor.
+        XUndefineCursor(dpy, win);
+        return;
     }
     //vars to make blank cursor
     Pixmap blank;
@@ -193,7 +196,7 @@ void ShowCursor(const int onoff)
     //make a blank cursor
     blank = XCreateBitmapFromData (dpy, win, data, 1, 1);
     if (blank == None)
-	std::cout << "error: out of memory." << std::endl;
+        std::cout << "error: out of memory." << std::endl;
     cursor = XCreatePixmapCursor(dpy, blank, blank, &dummy, &dummy, 0, 0);
     XFreePixmap(dpy, blank);
     //this makes you the cursor. then set it using this function
@@ -227,8 +230,8 @@ void init_opengl(void)
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
     ShowCursor(0);
-    /*
 
+    /*
        GLfloat mat_specular[] = { 0.1, 0.1, 0.1, 1.0 };
        GLfloat mat_shininess[] = { 0.0 };
        GLfloat light_position[] = { 0.0, 1.0, 0.0, 0.0 };
@@ -238,11 +241,12 @@ void init_opengl(void)
        glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
        glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-       */
+       */     
+
     glClearDepth( 1.0f );
     glEnable( GL_DEPTH_TEST );
     glDepthFunc( GL_LEQUAL );
-    //glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LESS);
     glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
     GLfloat amb_light[] = { 0.1, 0.1, 0.1, 1.0 };
     GLfloat diffuse[] = { 0.6, 0.6, 0.6, 1 };
@@ -263,23 +267,23 @@ void init_opengl(void)
 void check_mouse(XEvent *e, Game *game)
 {
     if (e->type == ButtonRelease) {
-	if (e->xbutton.button==3) {
-	    //Right button was pressed
-	    zoom = 0;
-	    return;
-	}
-	return;
+        if (e->xbutton.button==3) {
+            //Right button was pressed
+            zoom = 0;
+            return;
+        }
+        return;
     }
     if (e->type == ButtonPress) {
-	if (e->xbutton.button==1) {
-	    //Left button was pressed
-	    return;
-	}
-	if (e->xbutton.button==3) {
-	    //Right button was pressed
-	    zoom = 1;
-	    return;
-	}
+        if (e->xbutton.button==1) {
+            //Left button was pressed
+            return;
+        }
+        if (e->xbutton.button==3) {
+            //Right button was pressed
+            zoom = 1;
+            return;
+        }
     }
     int dx = e->xbutton.x - (WINDOW_WIDTH / 2);
     int dy = e->xbutton.y - (WINDOW_HEIGHT / 2);
@@ -287,57 +291,59 @@ void check_mouse(XEvent *e, Game *game)
     roty +=(float) dy / 2000.0;
     rotx = fmod(rotx,2.0*PI);
     if (rotx < 0.0)
-	rotx += PI * 2.0;
+        rotx += PI * 2.0;
     if (roty > PI / 2.0)
-	roty = PI / 2.0;
+        roty = PI / 2.0;
     if (roty < -PI / 2.0)
-	roty = -PI / 2.0;
+        roty = -PI / 2.0;
     if (dx != 0 || dy != 0)
-	CenterPointer();
+        CenterPointer();
 
 }
 
 void CenterPointer()
 {
-	XWarpPointer(dpy,root,root,0,0,WINDOW_WIDTH,WINDOW_HEIGHT,WINDOW_WIDTH/2,WINDOW_HEIGHT/2);
+    XWarpPointer(dpy,root,root,0,0,
+            WINDOW_WIDTH,WINDOW_HEIGHT,
+            WINDOW_WIDTH/2,WINDOW_HEIGHT/2);
 }
 
 int check_keys(XEvent *e, Game *game)
 {
     //Was there input from the keyboard?
     if (e->type == KeyPress) {
-	int key = XLookupKeysym(&e->xkey, 0);
-	if (key == XK_Escape) {
-	    return 1;
-	}
-	if (key == XK_w) {
-	    game->moveX = 1;
-	}
-	if (key == XK_s) {
-	    game->moveX = -1;
-	}
-	if (key == XK_a) {
-	    game->moveY = -1;
-	}
-	if (key == XK_d) {
-	    game->moveY = 1;
-	}
-	//You may check other keys here.
+        int key = XLookupKeysym(&e->xkey, 0);
+        if (key == XK_Escape) {
+            return 1;
+        }
+        if (key == XK_w) {
+            game->moveX = 1;
+        }
+        if (key == XK_s) {
+            game->moveX = -1;
+        }
+        if (key == XK_a) {
+            game->moveY = -1;
+        }
+        if (key == XK_d) {
+            game->moveY = 1;
+        }
+        //You may check other keys here.
 
     }else if (e->type == KeyRelease) {
-	int key = XLookupKeysym(&e->xkey, 0);
-	if (key == XK_w) {
-	    game->moveX = 0;
-	}
-	if (key == XK_s) {
-	    game->moveX = 0;
-	}
-	if (key == XK_a) {
-	    game->moveY = 0;
-	}
-	if (key == XK_d) {
-	    game->moveY = 0;
-	}        
+        int key = XLookupKeysym(&e->xkey, 0);
+        if (key == XK_w) {
+            game->moveX = 0;
+        }
+        if (key == XK_s) {
+            game->moveX = 0;
+        }
+        if (key == XK_a) {
+            game->moveY = 0;
+        }
+        if (key == XK_d) {
+            game->moveY = 0;
+        }        
     }
     return 0;
 
@@ -346,16 +352,18 @@ int check_keys(XEvent *e, Game *game)
 void movement(Game *game)
 {
     if (game->moveY == 0 || game->moveX == 0){
-	//moving orthogonally
-	game->velocityX = (float)game->moveX;
-	game->velocityY = (float)game->moveY;
+        //moving orthogonally
+        game->velocityX = (float)game->moveX;
+        game->velocityY = (float)game->moveY;
     } else {
-	//moving diagonally
-	game->velocityX = (float)game->moveX / 1.414;
-	game->velocityY = (float)game->moveY / 1.414;
+        //moving diagonally
+        game->velocityX = (float)game->moveX / 1.414;
+        game->velocityY = (float)game->moveY / 1.414;
     }
-    game->pos.z += (game->velocityX * cos(rotx) + game->velocityY * -sin(rotx)) / 5.0;
-    game->pos.x -= (game->velocityY * cos(rotx) + game->velocityX * sin(rotx)) / 5.0;
+    game->pos.z += (game->velocityX * cos(rotx)
+            + game->velocityY * -sin(rotx)) / 5.0;
+    game->pos.x -= (game->velocityY * cos(rotx)
+            + game->velocityX * sin(rotx)) / 5.0;
 }
 
 Vec normal(Vec A, Vec B, Vec C)
@@ -439,7 +447,8 @@ void SwitchTo3D()
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);  
     glEnable(GL_LIGHTING);
-    glFrustum(-0.1/WINDOW_HEIGHT*WINDOW_WIDTH, 0.1/WINDOW_HEIGHT*WINDOW_WIDTH, -0.1, 0.1, dep, 200.0);
+    glFrustum(-0.1/WINDOW_HEIGHT*WINDOW_WIDTH, 
+            0.1/WINDOW_HEIGHT*WINDOW_WIDTH, -0.1, 0.1, dep, 200.0);
 
 }
 
@@ -467,14 +476,13 @@ void render(Game *game)
 {
 
     if (zoom == 1 && dep < 0.45) {
-	dep += 0.025;
+        dep += 0.025;
     }else if (zoom == 0 && dep > 0.15) {
-	dep -= 0.025;
+        dep -= 0.025;
     }
 
 
     float ra = 20.0;
-    //Rect r;
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     float top = 4.0;
     float bot = -2.0;
@@ -508,7 +516,14 @@ void render(Game *game)
     v[0].z = v[1].z = v[5].z = v[4].z = -ra;
     v[2].z = v[3].z = v[6].z = v[7].z = ra;
 
-    int verts[][4] = {{4,5,6,7},{3,2,1,0},{0,1,5,4},{7,6,2,3},{1,2,6,5},{4,7,3,0}};
+    int verts[][4] = {
+        {4,5,6,7},
+        {3,2,1,0},
+        {0,1,5,4},
+        {7,6,2,3},
+        {1,2,6,5},
+        {4,7,3,0}
+    };
     glPushMatrix();
 
     glRotatef(roty / PI * 180.0,1,0,0);
@@ -516,21 +531,25 @@ void render(Game *game)
     glTranslatef(game->pos.x, game->pos.y, game->pos.z);
 
     for (int i = 0; i < 6; i++) {
-	glColor3f(c[i].x,c[i].y,c[i].z);
-	glBegin(GL_POLYGON);
-	Vec N = normal(v[verts[i][0]],v[verts[i][1]],v[verts[i][2]]);
-	glNormal3f(N.x,N.y,N.z);
-	for (int j = 0; j < 4; j++){
-	    glVertex3f(v[verts[i][j]].x, v[verts[i][j]].y, v[verts[i][j]].z);
-	}
-	glEnd();
-	glDisable(GL_LIGHTING);
-	glBegin(GL_LINE_STRIP);
-	glColor3f(1.0f,1.0f,1.0f);
-	glVertex3f((v[verts[i][0]].x+v[verts[i][2]].x)/2.0 + N.x, (v[verts[i][0]].y+v[verts[i][2]].y)/2.0 + N.y, (v[verts[i][0]].z+v[verts[i][2]].z)/2.0 + N.z);
-	glVertex3f((v[verts[i][0]].x+v[verts[i][2]].x)/2.0, (v[verts[i][0]].y+v[verts[i][2]].y)/2.0, (v[verts[i][0]].z+v[verts[i][2]].z)/2.0);
-	glEnd();
-	glEnable(GL_LIGHTING);
+        glColor3f(c[i].x,c[i].y,c[i].z);
+        glBegin(GL_POLYGON);
+        Vec N = normal(v[verts[i][0]],v[verts[i][1]],v[verts[i][2]]);
+        glNormal3f(N.x,N.y,N.z);
+        for (int j = 0; j < 4; j++){
+            glVertex3f(v[verts[i][j]].x, v[verts[i][j]].y, v[verts[i][j]].z);
+        }
+        glEnd();
+        glDisable(GL_LIGHTING);
+        glBegin(GL_LINE_STRIP);
+        glColor3f(1.0f,1.0f,1.0f);
+        glVertex3f((v[verts[i][0]].x+v[verts[i][2]].x)/2.0 + N.x,
+                (v[verts[i][0]].y+v[verts[i][2]].y)/2.0 + N.y,
+                (v[verts[i][0]].z+v[verts[i][2]].z)/2.0 + N.z);
+        glVertex3f((v[verts[i][0]].x+v[verts[i][2]].x)/2.0,
+                (v[verts[i][0]].y+v[verts[i][2]].y)/2.0,
+                (v[verts[i][0]].z+v[verts[i][2]].z)/2.0);
+        glEnd();
+        glEnable(GL_LIGHTING);
     }
 
 
